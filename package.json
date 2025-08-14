@@ -8,5 +8,8 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@api/clickup": "file:.api/apis/clickup"
   }
 }

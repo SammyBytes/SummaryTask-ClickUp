@@ -1,5 +1,7 @@
 import type { TaskEntity } from "../../core/entities/TaskEntity";
-
+/**
+ * Repository for Task entities operations
+ */
 export interface ITaskRepository {
-	getAsync(taskId: string): Promise<TaskEntity[]>;
+	getAsync(taskId: string, includeSubtasks: boolean): Promise<TaskEntity>;
 }
