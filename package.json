@@ -1,11 +1,20 @@
 {
-  "name": "summarytask-clickup",
-  "module": "src/index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+	"name": "summarytask-clickup",
+	"module": "src/index.ts",
+	"type": "module",
+	"devDependencies": {
+		"@biomejs/biome": "2.1.4",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@api/clickup": "file:.api/apis/clickup"
+	},
+	"scripts": {
+		"start": "bun run src/index.ts",
+		"format": "biome format",
+		"lint": "biome check"
+	}
 }

@@ -1,15 +1,77 @@
-# summarytask-clickup
+### summarytask-clickup
 
-To install dependencies:
+**summarytask-clickup** is a lightweight library for managing and summarizing tasks from ClickUp. It is designed with a **layered architecture**, keeping the code as **abstract and modular as possible**, so it can be migrated or adapted to other platforms in the future.
+
+> ⚠️ This project only supports **BunJS** as the runtime. Using Node.js, Deno, or any other runtime is not allowed.
+
+## Features
+
+- Fetch and summarize subtasks due today.
+- Generate lists of completed and missed tasks.
+- Fully abstracted service and repository layers for easy migration.
+- Integration-focused design for ClickUp, but code is platform-agnostic.
+
+## Tech Stack
+
+- **Runtime:** BunJS
+- **Formatter:** Biome
+- **Language:** TypeScript
+- **Architecture:** Layered / Clean Architecture
+- **Dependencies:** ClickUp API integration
+
+## Installation
 
 ```bash
 bun install
-```
+````
 
-To run:
+## Usage
 
 ```bash
 bun run src/index.ts
 ```
 
-This project was created using `bun init` in bun v1.2.19. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+### Example
+
+```ts
+import { TaskSummaryService } from "./application/services/TaskSummaryService";
+import { ClickUpTaskRepository } from "./infrastructure/repository/ClickUpTaskRepository";
+
+const repository = new ClickUpTaskRepository();
+const service = new TaskSummaryService(repository);
+
+const summary = await service.getTodaySummaryAsync("task-id-123");
+console.log(summary);
+```
+
+## Formatting
+
+This project uses **Biome** for formatting and linting. You can format your code using:
+
+```bash
+bun run format
+```
+
+## Project Structure
+
+```
+src/
+ ├─ application/        # Services, DTOs, and interfaces
+ ├─ core/               # Entities and core business logic
+ ├─ infrastructure/     # Repositories and API integrations
+ └─ shared/             # Utility classes and environment management
+```
+
+## Scripts
+
+All scripts are configured to run with Bun:
+
+* `bun run start` → Runs the project
+* `bun run format` → Formats the code with Biome
+* `bun run lint` → Checks code formatting
+
+## Notes
+
+* Designed for **ClickUp integration**, but written to be **platform-agnostic**.
+* Abstracted layers make it easy to switch services or APIs without refactoring business logic.
+
