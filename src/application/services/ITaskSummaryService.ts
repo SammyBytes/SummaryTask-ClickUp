@@ -6,6 +6,12 @@ export interface ITaskSummaryService {
 	getTodaySummaryAsync(
 		taskId: string,
 		includeSubtasks: boolean,
-		assignedUser?: string,
+	): Promise<TasksSummaryDto>;
+
+	getRangeSummaryAsync(
+		workspaceId: string,
+		includeSubtasks: boolean,
+		startDate: Date,
+		endDate: Date,
 	): Promise<TasksSummaryDto>;
 }

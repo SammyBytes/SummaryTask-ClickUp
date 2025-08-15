@@ -1,20 +1,16 @@
-export class SubTaskEntity {
-	constructor(
-		public id: string,
-		public name: string,
-		public completed: boolean,
-		public dueDate?: Date,
-	) {}
+import { TaskEntity } from "./TaskEntity";
 
-	public IsTaskDueToday(): boolean {
-		if (!this.dueDate) {
-			return false;
-		}
-		const now = new Date();
-		return this.dueDate.toDateString() === now.toDateString();
-	}
-
-	public IsCompleted(): boolean {
-		return this.completed;
+export class SubTaskEntity extends TaskEntity {
+	constructor(task: TaskEntity) {
+		super(
+			task.id,
+			task.name,
+			task.description,
+			task.priority,
+			task.status,
+			task.assignees,
+			task.subtasks,
+			task.dueDate,
+		);
 	}
 }

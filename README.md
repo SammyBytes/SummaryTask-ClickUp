@@ -36,12 +36,23 @@ bun run src/index.ts
 ```ts
 import { TaskSummaryService } from "./application/services/TaskSummaryService";
 import { ClickUpTaskRepository } from "./infrastructure/repository/ClickUpTaskRepository";
+import { EnvManager } from "./shared/EnvManager";
+import { TaskDomainService } from "./core/domain/TaskDomainService";
 
 const repository = new ClickUpTaskRepository();
-const service = new TaskSummaryService(repository);
+const taskDomainService = new TaskDomainService();
+const service = new TaskSummaryService(repository, taskDomainService);
 
 const summary = await service.getTodaySummaryAsync("task-id-123");
-console.log(summary);
+console.log("Summary", summary);
+
+const rangeSummary = await service.getRangeSummaryAsync(
+	EnvManager.CLICKUP_WORKSPACE_ID,
+	true,
+	new Date("2025-08-11"),
+	new Date("2025-08-31"),
+);  
+console.log("RangeSummary", rangeSummary);
 ```
 
 ## Formatting

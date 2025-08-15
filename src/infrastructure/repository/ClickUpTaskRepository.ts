@@ -1,17 +1,40 @@
 import clickup from "@api/clickup";
 import type { ITaskRepository } from "../../application/repository/ITaskRepository";
-import { SubTaskEntity } from "../../core/entities/SubTaskEntity";
-import { TaskEntity } from "../../core/entities/TaskEntity";
 import { EnvManager } from "../../shared/EnvManager";
 import type { ClickUpTask } from "../../application/models/clickup/IClickUpTask";
-import type { ClickUpSubtask } from "../../application/models/clickup/IClickUpSubtask";
+import { ClickupMapper } from "../helpers/ClickupMapper";
+import type { TaskEntity } from "../../core/entities/TaskEntity";
 
 export class ClickUpTaskRepository implements ITaskRepository {
+	constructor() {
+		clickup.auth(EnvManager.CLICKUP_PERSONAL_TOKEN);
+	}
+	public async getRangeAsync(
+		workspaceId: string,
+		includeSubtasks: boolean,
+		startDate: Date,
+		endDate: Date,
+	): Promise<TaskEntity[]> {
+		var response = await clickup.getFilteredTeamTasks({
+			team_id: Number.parseInt(workspaceId) || 0,
+			due_date_gt: startDate.getTime(),
+			due_date_lt: endDate.getTime(),
+			include_subtasks: includeSubtasks,
+			team_Id: Number.parseInt(workspaceId) || 0,
+		});
+
+		if (response.status !== 200) {
+			throw new Error("Error getting tasks");
+		}
+		const tasks: ClickUpTask[] = response.data
+			.tasks as unknown as ClickUpTask[];
+
+		return tasks.map((task) => ClickupMapper.mapClickUpTask(task));
+	}
 	public async getAsync(
 		taskId: string,
 		includeSubtasks: boolean,
 	): Promise<TaskEntity> {
-		clickup.auth(EnvManager.CLICKUP_PERSONAL_TOKEN);
 		var response = await clickup.getTask({
 			include_subtasks: includeSubtasks,
 			task_id: taskId,
@@ -20,29 +43,7 @@ export class ClickUpTaskRepository implements ITaskRepository {
 		if (response.status !== 200) {
 			throw new Error("Error getting task");
 		}
-
 		const data: ClickUpTask = response.data as ClickUpTask;
-		const subtasksEntities: SubTaskEntity[] = (data.subtasks || []).map(
-			(st: ClickUpSubtask) => {
-				const completed = st.status?.status === "complete" || false;
-				const dueDate = st.due_date ? new Date(Number(st.due_date)) : undefined;
-				return new SubTaskEntity(st.id, st.name, completed, dueDate);
-			},
-		);
-
-		const taskCompleted = data.status?.status === "complete" || false;
-		const dueDate = data.due_date ? new Date(Number(data.due_date)) : undefined;
-		const assignee = data.assignees ?? [];
-
-		const task = new TaskEntity(
-			Number(data.id),
-			data.name,
-			data.description || "",
-			dueDate ?? new Date(),
-			taskCompleted,
-			assignee.map((a) => a.username),
-			subtasksEntities,
-		);
-		return task;
+		return ClickupMapper.mapClickUpTask(data);
 	}
 }
