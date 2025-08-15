@@ -1,18 +1,18 @@
 import type { TaskEntity } from "../entities/TaskEntity";
 import { TaskStatusEnum } from "../enum/TaskStatusEnum";
+import type { ITaskDomainService } from "./interfaces/ITaskDomainService";
 
-export class TaskDomainService {
-	constructor(private task: TaskEntity) {}
-
-	public isOverdue(): boolean {
-		return this.task.dueDate.getTime() < Date.now();
+export class TaskDomainService implements ITaskDomainService {
+	public isOverdue(task: TaskEntity): boolean {
+		if (!task.dueDate) return false;
+		return task.dueDate?.getTime() < Date.now();
 	}
 
-	public isCompleted(): boolean {
-		return this.task.status === TaskStatusEnum.COMPLETED;
+	public isCompleted(task: TaskEntity): boolean {
+		return task.status === TaskStatusEnum.COMPLETED;
 	}
 
-	public isToday(): boolean {
-		return this.task.dueDate.toDateString() === new Date().toDateString();
+	public isToday(task: TaskEntity): boolean {
+		return task.dueDate?.toDateString() === new Date().toDateString();
 	}
 }

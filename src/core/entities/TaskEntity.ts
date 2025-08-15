@@ -16,6 +16,6 @@ export class TaskEntity {
 		public status: TaskStatusEnum,
 		public assignees: UserEntity[] = [],
 		public subtasks: SubTaskEntity[] = [],
-		public dueDate: Date,
+		public dueDate?: Date,
 	) {}
 }

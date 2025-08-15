@@ -1,4 +1,4 @@
-export enum TaskPriorityEnum {
+export const enum TaskPriorityEnum {
 	LOW = "low",
 	MEDIUM = "medium",
 	HIGH = "high",
