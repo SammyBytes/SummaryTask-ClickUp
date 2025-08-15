@@ -27,66 +27,43 @@ export class TaskSummaryService implements ITaskSummaryService {
 			endDate,
 		);
 
-		const completedToday = this.getCompletedSubtasksForRange(
-			tasks,
-			startDate,
-			endDate,
-		);
-		const missedToday = this.getMissedSubtasksForRange(
-			tasks,
-			startDate,
-			endDate,
-		);
+		const completedToday = this.getCompletedSubtasksForRange(tasks);
+		const missedToday = this.getMissedSubtasksForRange(tasks);
 
 		return new TasksSummaryDto(tasks.length, completedToday, missedToday);
 	}
 
-	private getCompletedSubtasksForRange(
-		tasks: TaskEntity[],
-		startDate: Date,
-		endDate: Date,
-	) {
+	private getCompletedSubtasksForRange(tasks: TaskEntity[]) {
 		return tasks
 			.filter((task) => this.taskDomainService.isCompleted(task))
-			.filter(
-				(task) =>
-					task.dueDate &&
-					task.dueDate.getTime() >= startDate.getTime() &&
-					task.dueDate.getTime() <= endDate.getTime(),
-			)
+
 			.map(
 				(task) =>
 					new TaskSubtaskSummaryDto(
 						task.id.toString(),
 						task.name,
+						task.description,
 						task.assignees,
 						true,
 						true,
+						task.subtasks,
 					),
 			);
 	}
 
-	private getMissedSubtasksForRange(
-		tasks: TaskEntity[],
-		startDate: Date,
-		endDate: Date,
-	) {
+	private getMissedSubtasksForRange(tasks: TaskEntity[]) {
 		return tasks
-			.filter((task) => task.status !== TaskStatusEnum.COMPLETED)
-			.filter(
-				(task) =>
-					task.dueDate &&
-					task.dueDate.getTime() >= startDate.getTime() &&
-					task.dueDate.getTime() <= endDate.getTime(),
-			)
+			.filter((task) => !this.taskDomainService.isCompleted(task))
 			.map(
 				(task) =>
 					new TaskSubtaskSummaryDto(
 						task.id.toString(),
 						task.name,
+						task.description,
 						task.assignees,
 						false,
 						true,
+						task.subtasks,
 					),
 			);
 	}
@@ -152,9 +129,11 @@ export class TaskSummaryService implements ITaskSummaryService {
 					new TaskSubtaskSummaryDto(
 						st.id.toString(),
 						st.name,
+						st.description,
 						taskAssignee,
 						true,
 						true,
+						st.subtasks,
 					),
 			);
 	}
@@ -180,9 +159,11 @@ export class TaskSummaryService implements ITaskSummaryService {
 					new TaskSubtaskSummaryDto(
 						st.id.toString(),
 						st.name,
+						st.description,
 						taskAssignee,
 						false,
 						true,
+						st.subtasks,
 					),
 			);
 	}

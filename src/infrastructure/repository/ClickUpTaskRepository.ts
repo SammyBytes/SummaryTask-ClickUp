@@ -19,7 +19,10 @@ export class ClickUpTaskRepository implements ITaskRepository {
 			team_id: Number.parseInt(workspaceId) || 0,
 			due_date_gt: startDate.getTime(),
 			due_date_lt: endDate.getTime(),
-			include_subtasks: includeSubtasks,
+			start: startDate.toISOString(),
+			end: endDate.toISOString(),
+			subtasks: includeSubtasks,
+
 			team_Id: Number.parseInt(workspaceId) || 0,
 		});
 
@@ -29,7 +32,18 @@ export class ClickUpTaskRepository implements ITaskRepository {
 		const tasks: ClickUpTask[] = response.data
 			.tasks as unknown as ClickUpTask[];
 
-		return tasks.map((task) => ClickupMapper.mapClickUpTask(task));
+		// NOTE: ClickUp API does not return subtasks for tasks that are not
+		// included in the request. So we need to make a second request to get
+		// the full task details.
+		const tasksWithSubtasks = await Promise.all(
+			tasks.map(async (task) => {
+				if (!includeSubtasks) return ClickupMapper.mapClickUpTask(task);
+				const fullTask = await this.getAsync(task.id.toString(), true);
+				return fullTask;
+			}),
+		);
+
+		return tasksWithSubtasks;
 	}
 	public async getAsync(
 		taskId: string,
