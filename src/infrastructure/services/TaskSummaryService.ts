@@ -2,10 +2,94 @@ import { TasksSummaryDto } from "../../application/dtos/TasksSummaryDto";
 import { TaskSubtaskSummaryDto } from "../../application/dtos/TaskSubtaskSummaryDto";
 import type { ITaskRepository } from "../../application/repository/ITaskRepository";
 import type { ITaskSummaryService } from "../../application/services/ITaskSummaryService";
+import type { ITaskDomainService } from "../../core/domain/interfaces/ITaskDomainService";
 import type { SubTaskEntity } from "../../core/entities/SubTaskEntity";
+import type { TaskEntity } from "../../core/entities/TaskEntity";
+import type { UserEntity } from "../../core/entities/UserEntity";
+import { TaskStatusEnum } from "../../core/enum/TaskStatusEnum";
 
 export class TaskSummaryService implements ITaskSummaryService {
-	constructor(private taskRepository: ITaskRepository) {}
+	constructor(
+		private taskRepository: ITaskRepository,
+		private taskDomainService: ITaskDomainService,
+	) {}
+
+	public async getRangeSummaryAsync(
+		workspaceId: string,
+		includeSubtasks: boolean,
+		startDate: Date,
+		endDate: Date,
+	): Promise<TasksSummaryDto> {
+		const tasks = await this.taskRepository.getRangeAsync(
+			workspaceId,
+			includeSubtasks,
+			startDate,
+			endDate,
+		);
+
+		const completedToday = this.getCompletedSubtasksForRange(
+			tasks,
+			startDate,
+			endDate,
+		);
+		const missedToday = this.getMissedSubtasksForRange(
+			tasks,
+			startDate,
+			endDate,
+		);
+
+		return new TasksSummaryDto(tasks.length, completedToday, missedToday);
+	}
+
+	private getCompletedSubtasksForRange(
+		tasks: TaskEntity[],
+		startDate: Date,
+		endDate: Date,
+	) {
+		return tasks
+			.filter((task) => this.taskDomainService.isCompleted(task))
+			.filter(
+				(task) =>
+					task.dueDate &&
+					task.dueDate.getTime() >= startDate.getTime() &&
+					task.dueDate.getTime() <= endDate.getTime(),
+			)
+			.map(
+				(task) =>
+					new TaskSubtaskSummaryDto(
+						task.id.toString(),
+						task.name,
+						task.assignees,
+						true,
+						true,
+					),
+			);
+	}
+
+	private getMissedSubtasksForRange(
+		tasks: TaskEntity[],
+		startDate: Date,
+		endDate: Date,
+	) {
+		return tasks
+			.filter((task) => task.status !== TaskStatusEnum.COMPLETED)
+			.filter(
+				(task) =>
+					task.dueDate &&
+					task.dueDate.getTime() >= startDate.getTime() &&
+					task.dueDate.getTime() <= endDate.getTime(),
+			)
+			.map(
+				(task) =>
+					new TaskSubtaskSummaryDto(
+						task.id.toString(),
+						task.name,
+						task.assignees,
+						false,
+						true,
+					),
+			);
+	}
 
 	/**
 	 * Returns today's summary of subtasks for a given task.
@@ -23,9 +107,12 @@ export class TaskSummaryService implements ITaskSummaryService {
 		const subtasksForToday = this.getSubtasksForToday(task.subtasks);
 		const completedToday = this.getCompletedSubtasks(
 			subtasksForToday,
-			task.assignee,
+			task.assignees,
 		);
-		const missedToday = this.getMissedSubtasks(subtasksForToday, task.assignee);
+		const missedToday = this.getMissedSubtasks(
+			subtasksForToday,
+			task.assignees,
+		);
 
 		return new TasksSummaryDto(
 			task.subtasks.length,
@@ -41,13 +128,10 @@ export class TaskSummaryService implements ITaskSummaryService {
 	 * @returns Subtasks that are due today (and optionally assigned to user)
 	 */
 	private getSubtasksForToday(subtasks: SubTaskEntity[]) {
-		const today = new Date().toDateString();
 		return subtasks.filter((st) => {
 			if (!st.dueDate) return false;
 
-			const isToday = st.dueDate.toDateString() === today;
-
-			return isToday;
+			return this.taskDomainService.isToday(st);
 		});
 	}
 
@@ -59,13 +143,19 @@ export class TaskSummaryService implements ITaskSummaryService {
 	 */
 	private getCompletedSubtasks(
 		subtasks: SubTaskEntity[],
-		taskAssignee: string[],
+		taskAssignee: UserEntity[],
 	) {
 		return subtasks
-			.filter((st) => st.IsCompleted())
+			.filter((st) => this.taskDomainService.isCompleted(st))
 			.map(
 				(st) =>
-					new TaskSubtaskSummaryDto(st.id, st.name, taskAssignee, true, true),
+					new TaskSubtaskSummaryDto(
+						st.id.toString(),
+						st.name,
+						taskAssignee,
+						true,
+						true,
+					),
 			);
 	}
 
@@ -75,12 +165,25 @@ export class TaskSummaryService implements ITaskSummaryService {
 	 * @param taskAssignee Assignee of the parent task
 	 * @returns Array of TaskSubtaskSummaryDto for missed subtasks
 	 */
-	private getMissedSubtasks(subtasks: SubTaskEntity[], taskAssignee: string[]) {
+	private getMissedSubtasks(
+		subtasks: SubTaskEntity[],
+		taskAssignee: UserEntity[],
+	) {
 		return subtasks
-			.filter((st) => st.IsTaskDueToday() && !st.completed)
+			.filter(
+				(st) =>
+					this.taskDomainService.isToday(st) &&
+					st.status !== TaskStatusEnum.COMPLETED,
+			)
 			.map(
 				(st) =>
-					new TaskSubtaskSummaryDto(st.id, st.name, taskAssignee, false, true),
+					new TaskSubtaskSummaryDto(
+						st.id.toString(),
+						st.name,
+						taskAssignee,
+						false,
+						true,
+					),
 			);
 	}
 }
