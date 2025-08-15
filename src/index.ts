@@ -15,7 +15,7 @@ async function main() {
 		const rangeSummary = await taskSummaryService.getRangeSummaryAsync(
 			EnvManager.CLICKUP_WORKSPACE_ID,
 			true,
-			new Date("2025-08-11"),
+			new Date("2025-08-21"),
 			new Date("2025-08-31"),
 		);
 		console.log("RangeSummary", rangeSummary);
