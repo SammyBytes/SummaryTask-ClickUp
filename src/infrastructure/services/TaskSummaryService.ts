@@ -26,6 +26,7 @@ export class TaskSummaryService implements ITaskSummaryService {
 			startDate,
 			endDate,
 		);
+
 		const completedToday = this.getCompletedSubtasksForRange(
 			tasks,
 			startDate,
@@ -71,11 +72,7 @@ export class TaskSummaryService implements ITaskSummaryService {
 		endDate: Date,
 	) {
 		return tasks
-			.filter(
-				(task) =>
-					this.taskDomainService.isToday(task) &&
-					task.status === TaskStatusEnum.COMPLETED,
-			)
+			.filter((task) => task.status !== TaskStatusEnum.COMPLETED)
 			.filter(
 				(task) =>
 					task.dueDate &&

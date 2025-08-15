@@ -17,11 +17,12 @@ export class ClickUpTaskRepository implements ITaskRepository {
 	): Promise<TaskEntity[]> {
 		var response = await clickup.getFilteredTeamTasks({
 			team_id: Number.parseInt(workspaceId) || 0,
-			start: startDate.toISOString(),
-			end: endDate.toISOString(),
+			due_date_gt: startDate.getTime(),
+			due_date_lt: endDate.getTime(),
 			include_subtasks: includeSubtasks,
 			team_Id: Number.parseInt(workspaceId) || 0,
 		});
+
 
 		if (response.status !== 200) {
 			throw new Error("Error gettings tasks");

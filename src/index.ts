@@ -1,6 +1,7 @@
 import { TaskDomainService } from "./core/domain/TaskDomainService";
 import { ClickUpTaskRepository } from "./infrastructure/repository/ClickUpTaskRepository";
 import { TaskSummaryService } from "./infrastructure/services/TaskSummaryService";
+import { EnvManager } from "./shared/EnvManager";
 
 async function main() {
 	try {
@@ -10,17 +11,12 @@ async function main() {
 			taskRepository,
 			taskDomainService,
 		);
-		const summary = await taskSummaryService.getTodaySummaryAsync(
-			"86dx669kn",
-			true,
-		);
-		console.log("Summary", summary);
 
 		const rangeSummary = await taskSummaryService.getRangeSummaryAsync(
-			"9017124594",
+			EnvManager.CLICKUP_WORKSPACE_ID,
 			true,
-			new Date("2025-08-01"),
-			new Date("2025-08-15"),
+			new Date("2025-08-11"),
+			new Date("2025-08-31"),
 		);
 		console.log("RangeSummary", rangeSummary);
 	} catch (error) {
