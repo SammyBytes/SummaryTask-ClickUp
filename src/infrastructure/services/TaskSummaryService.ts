@@ -173,7 +173,7 @@ export class TaskSummaryService implements ITaskSummaryService {
 			.filter(
 				(st) =>
 					this.taskDomainService.isToday(st) &&
-					st.status === TaskStatusEnum.COMPLETED,
+					st.status !== TaskStatusEnum.COMPLETED,
 			)
 			.map(
 				(st) =>
