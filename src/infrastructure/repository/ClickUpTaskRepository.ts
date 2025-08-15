@@ -23,9 +23,8 @@ export class ClickUpTaskRepository implements ITaskRepository {
 			team_Id: Number.parseInt(workspaceId) || 0,
 		});
 
-
 		if (response.status !== 200) {
-			throw new Error("Error gettings tasks");
+			throw new Error("Error getting tasks");
 		}
 		const tasks: ClickUpTask[] = response.data
 			.tasks as unknown as ClickUpTask[];

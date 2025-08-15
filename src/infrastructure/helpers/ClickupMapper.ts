@@ -1,10 +1,14 @@
 /** biome-ignore-all lint/complexity/noStaticOnlyClass: <explanation> */
 import type { ClickUpTask } from "../../application/models/clickup/IClickUpTask";
 import { TaskEntity } from "../../core/entities/TaskEntity";
-import { SubTaskEntity } from "../../core/entities/SubTaskEntity";
 import { TaskStatusEnum } from "../../core/enum/TaskStatusEnum";
 import { TaskPriorityEnum } from "../../core/enum/TaskPriorityEnum";
 import { UserEntity } from "../../core/entities/UserEntity";
+import {
+	CLICK_PRIORITY_HIGH,
+	CLICK_PRIORITY_LOW,
+	CLICK_PRIORITY_MEDIUM,
+} from "../../application/constants/clickup/CickUpPriorityConst";
 
 export class ClickupMapper {
 	public static mapClickUpTask(clickup: ClickUpTask): TaskEntity {
@@ -26,14 +30,15 @@ export class ClickupMapper {
 		if (status.includes("complete")) return TaskStatusEnum.COMPLETED;
 		if (status.includes("in progress")) return TaskStatusEnum.IN_PROGRESS;
 		if (status.includes("overdue")) return TaskStatusEnum.OVERDUE;
-		if (status.includes("to do")) return TaskStatusEnum.TO_DO; // default
-		return TaskStatusEnum.IN_PROGRESS; // default
+		if (status.includes("to do")) return TaskStatusEnum.TO_DO;
+
+		return TaskStatusEnum.TO_DO; // default
 	}
 
 	public static mapTaskPriority(priority: number): TaskPriorityEnum {
-		if (priority === 1) return TaskPriorityEnum.LOW;
-		if (priority === 2) return TaskPriorityEnum.MEDIUM;
-		if (priority === 3) return TaskPriorityEnum.HIGH;
+		if (priority === CLICK_PRIORITY_LOW) return TaskPriorityEnum.LOW;
+		if (priority === CLICK_PRIORITY_MEDIUM) return TaskPriorityEnum.MEDIUM;
+		if (priority === CLICK_PRIORITY_HIGH) return TaskPriorityEnum.HIGH;
 
 		return TaskPriorityEnum.LOW; // default
 	}
