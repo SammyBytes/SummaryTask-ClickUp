@@ -15,7 +15,7 @@ export class ClickUpTaskRepository implements ITaskRepository {
 		startDate: Date,
 		endDate: Date,
 	): Promise<TaskEntity[]> {
-		var response = await clickup.getFilteredTeamTasks({
+		const response = await clickup.getFilteredTeamTasks({
 			team_id: Number.parseInt(workspaceId) || 0,
 			due_date_gt: startDate.getTime(),
 			due_date_lt: endDate.getTime(),
@@ -35,7 +35,7 @@ export class ClickUpTaskRepository implements ITaskRepository {
 		taskId: string,
 		includeSubtasks: boolean,
 	): Promise<TaskEntity> {
-		var response = await clickup.getTask({
+		const response = await clickup.getTask({
 			include_subtasks: includeSubtasks,
 			task_id: taskId,
 		});

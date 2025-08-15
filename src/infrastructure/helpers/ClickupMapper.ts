@@ -8,7 +8,7 @@ import {
 	CLICK_PRIORITY_HIGH,
 	CLICK_PRIORITY_LOW,
 	CLICK_PRIORITY_MEDIUM,
-} from "../../application/constants/clickup/CickUpPriorityConst";
+} from "../../application/constants/clickup/ClickUpPriorityConst";
 
 export class ClickupMapper {
 	public static mapClickUpTask(clickup: ClickUpTask): TaskEntity {
